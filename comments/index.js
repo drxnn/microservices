@@ -20,7 +20,7 @@ app.post("/posts/:id/comments", async (req, res) => {
   const postId = req.params.id;
   const comments = commentsByPostId[req.params.id] || [];
 
-  comments.push({ id: commentId, content });
+  comments.push({ id: commentId, content, status: "pending" });
   await axios
     .post("http://localhost:4005/events", {
       type: "CommentCreated",
@@ -28,17 +28,54 @@ app.post("/posts/:id/comments", async (req, res) => {
         id: commentId,
         content,
         postId,
+        status: "pending",
       },
     })
     .catch((err) => console.log(err));
 
-  commentsByPostId[req.params.id] = comments;
+  commentsByPostId[postId] = comments;
+  console.log("comments here", comments);
 
   res.status(201).send(comments);
 });
 
-app.post("/events", (req, res) => {
+app.post("/events", async (req, res) => {
   console.log("received event", req.body.type);
+  const { type, data } = req.body;
+
+  if (type === "CommentModerated") {
+    const { postId, id, status, content } = data;
+    const comments = commentsByPostId[postId];
+    console.log(
+      "postid, id,content, status, and comments and commentsByPostId",
+      postId,
+      id,
+      content,
+      status,
+      comments,
+      commentsByPostId
+    );
+    console.log("Comments for postId:", postId, comments);
+    if (!comments) {
+      return res
+        .status(400)
+        .send({ error: "Post ID not found in commentsByPostId" });
+    }
+    const comment = comments.find((comment) => {
+      return comment.id === id;
+    });
+    console.log("comment if any", comment);
+    console.log("post id, id ,and status", postId, id, status);
+    if (!comment) {
+      return res.status(400).send({ message: "no comment with this id" });
+    }
+    comment.status = status;
+    await axios.post("http://localhost:4005/events", {
+      type: "CommentUpdated",
+      data: { id, status, postId, content },
+    });
+  }
+
   res.sendStatus(200);
 });
 
