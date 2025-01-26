@@ -8,11 +8,12 @@ app.use(express.json());
 
 app.post("/events", async (req, res) => {
   const { type, data } = req.body;
+  console.log("Event sent:", { type, data });
   if (!type || !data) {
     return res.status(400).send("Invalid event format");
   }
   if (type === "PostCreated") return;
-  if (type === "CommentModerated") {
+  if (type === "CommentModerated" || type === "CommentUpdated") {
     return res.sendStatus(200);
   }
   const { id, content, postId, status } = data;
@@ -31,7 +32,7 @@ app.post("/events", async (req, res) => {
   await axios
     .post("http://localhost:4005/events", {
       type: "CommentModerated",
-      data: { id, content, postId, status },
+      data: { id, content, postId, status: commentData.status },
     })
     .catch((err) => console.log(err));
 
