@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { body, validationResult } from "express-validator";
 import { RequestValidationError } from "../errors/requestValidationErrors";
+import jwt from "jsonwebtoken";
 
 import { User } from "../models/user";
 import { BadRequestError } from "../errors/badRequestError";
@@ -30,6 +31,21 @@ router.post(
     /// create
     const user = User.build({ email, password });
     const savedUser = await user.save();
+    //GENERATE A JWT HERE
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      // using ! below because JWT key is checked in index.ts befeore app runs
+      process.env.JWT_KEY!
+    );
+
+    req.session = {
+      jwt: userJwt,
+    };
+
+    //STORE IN SESSION
     res.status(201).send(savedUser);
   }
 );
