@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
-import { body, validationResult } from "express-validator";
-import { RequestValidationError } from "../errors/requestValidationErrors";
+import { body } from "express-validator";
+
 import jwt from "jsonwebtoken";
 
 import { User } from "../models/user";
 import { BadRequestError } from "../errors/badRequestError";
+import { validateRequest } from "../middlewares/validateRequest";
 
 const router = express.Router();
 router.post(
@@ -16,11 +17,8 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage("Password must be between 4-20 characters"),
   ],
+  validateRequest,
   async (req: Request, res: Response) => {
-    const errorsResult = validationResult(req);
-    if (!errorsResult.isEmpty()) {
-      throw new RequestValidationError(errorsResult.array());
-    }
     const { email, password } = req.body;
     const userFound = await User.findOne({ email: email });
 
