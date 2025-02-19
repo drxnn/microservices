@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import { validateRequest } from "../middlewares/validateRequest";
 import { BadRequestError } from "../errors/badRequestError";
 import { Password } from "../services/password";
-import { JsonWebTokenError } from "jsonwebtoken";
+
 const router = express.Router();
 router.post(
   "/api/users/signIn",

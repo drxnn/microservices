@@ -19,6 +19,7 @@ app.use(
 );
 
 app.use(currentUserRouter);
+
 app.use(signUpRouter);
 app.use(signOutRouter);
 app.use(signInRouter);
