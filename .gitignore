@@ -18,3 +18,7 @@ yarn-debug.log*
 /.idea/
 .DS_Store
 Thumbs.db
+
+
+# shared library
+ticketing/common
